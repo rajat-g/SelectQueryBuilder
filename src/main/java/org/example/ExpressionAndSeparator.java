@@ -2,8 +2,8 @@ package org.example;
 
 public abstract class ExpressionAndSeparator {
 
-    String expression;
-    String separator;
+    private String expression;
+    private String separator;
 
     public ExpressionAndSeparator(String expression, String separator) {
         this.expression = expression;

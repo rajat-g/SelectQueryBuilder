@@ -1,8 +1,10 @@
 package org.example;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class SelectBuilder implements Cloneable, Serializable {

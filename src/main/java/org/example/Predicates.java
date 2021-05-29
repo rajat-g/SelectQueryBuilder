@@ -3,7 +3,10 @@ package org.example;
 import java.util.Arrays;
 import java.util.List;
 
-public final class Predicates {
+public class Predicates {
+
+    private Predicates() {
+    }
 
     /**
      * Joins a series of predicates with AND.
@@ -201,6 +204,7 @@ public final class Predicates {
         return new Predicate() {
 
             public void init(SelectBuilder creator) {
+                //no value need to be added to parameters
             }
 
             public String toSql() {
@@ -216,6 +220,7 @@ public final class Predicates {
         return new Predicate() {
 
             public void init(SelectBuilder creator) {
+                //no value need to be added to parameters
             }
 
             public String toSql() {
@@ -226,7 +231,6 @@ public final class Predicates {
 
     public static Predicate gt(final String expr, final Object value) {
         return new Predicate() {
-            private String param;
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
             }
