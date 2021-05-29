@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Predicates {
 
@@ -45,12 +46,8 @@ public class Predicates {
         return new Predicate() {
             @Override
             public void init(SelectBuilder creator) {
-                if (start == null) {
-                    throw new NullPointerException("start is null");
-                }
-                if (end == null) {
-                    throw new NullPointerException("end is null");
-                }
+                Objects.requireNonNull(start, "start must not be null!");
+                Objects.requireNonNull(end, "end must not be null!");
                 creator.parameters(start);
                 creator.parameters(end);
             }
