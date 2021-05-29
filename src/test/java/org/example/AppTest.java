@@ -21,9 +21,31 @@ public class AppTest
         SelectBuilder selectBuilder = new SelectBuilder()
                 .column("*")
                 .from("Emp")
-                .where(Predicates.in("name", names));
+                .where(Predicates.operation(SearchOperation.IN,"name", names));
         assertEquals("SELECT * FROM Emp WHERE name in (?, ?, ?)", selectBuilder.toString());
         assertEquals(names, selectBuilder.getParameters());
+
+        selectBuilder = new SelectBuilder()
+                .column("*")
+                .from("Emp")
+                .where(Predicates.operation(SearchOperation.IN,"name", "Larry", "Curly", "Moe"));
+        assertEquals("SELECT * FROM Emp WHERE name in (?, ?, ?)", selectBuilder.toString());
+        assertEquals(names, selectBuilder.getParameters());
+
+
+        selectBuilder = new SelectBuilder()
+                .column("*")
+                .from("Emp")
+                .where(Predicates.operation(SearchOperation.IN,"name", "Larry"));
+        assertEquals("SELECT * FROM Emp WHERE name in (?)", selectBuilder.toString());
+        assertEquals(Arrays.asList("Larry"), selectBuilder.getParameters());
+
+        selectBuilder = new SelectBuilder()
+                .column("*")
+                .from("Emp")
+                .where(Predicates.operation(SearchOperation.IN,"name", "Larry", "Curly"));
+        assertEquals("SELECT * FROM Emp WHERE name in (?, ?)", selectBuilder.toString());
+        assertEquals(Arrays.asList("Larry", "Curly"), selectBuilder.getParameters());
     }
 
     @Test
@@ -52,38 +74,38 @@ public class AppTest
         //
         // Where clauses
         //
-        SelectBuilder sb = new SelectBuilder("Employee e").where(Predicates.like("name", "Bob%"));
+        SelectBuilder sb = new SelectBuilder("Employee e").where(Predicates.operation(SearchOperation.LIKE,"name", "Bob%"));
         assertEquals("SELECT * FROM Employee e WHERE name like ?", sb.toString());
         assertEquals(Collections.singletonList("Bob%"), sb.getParameters());
 
-        sb = new SelectBuilder("Employee e").where(Predicates.and(Predicates.like("name", "Bob%"), Predicates.gt("age", 37)));
+        sb = new SelectBuilder("Employee e").where(Predicates.and(Predicates.operation(SearchOperation.LIKE,"name", "Bob%"), Predicates.operation(SearchOperation.GREATER_THAN, "age", 37)));
         assertEquals("SELECT * FROM Employee e WHERE (name like ? AND age > ?)", sb.toString());
         assertEquals(Arrays.asList("Bob%", 37), sb.getParameters());
 
-        sb = new SelectBuilder("Employee e").where(Predicates.eq("name", "Bob")).orWhere(Predicates.eq("name", "John"));
+        sb = new SelectBuilder("Employee e").where(Predicates.operation(SearchOperation.EQUALS,"name", "Bob")).orWhere(Predicates.operation(SearchOperation.EQUALS,"name", "John"));
         assertEquals("SELECT * FROM Employee e WHERE name = ? OR name = ?", sb.toString());
         assertEquals(Arrays.asList("Bob", "John"), sb.getParameters());
 
-        sb = new SelectBuilder("Employee e").where(Predicates.eq("name", "Bob")).where(Predicates.eq("name", "John"));
+        sb = new SelectBuilder("Employee e").where(Predicates.operation(SearchOperation.EQUALS, "name", "Bob")).where(Predicates.operation(SearchOperation.EQUALS,"name", "John"));
         assertEquals("SELECT * FROM Employee e WHERE name = ? AND name = ?", sb.toString());
         assertEquals(Arrays.asList("Bob", "John"), sb.getParameters());
 
-        sb = new SelectBuilder("Employee e").where(Predicates.eq("name", "Bob")).andWhere(Predicates.eq("name", "John"));
+        sb = new SelectBuilder("Employee e").where(Predicates.operation(SearchOperation.EQUALS,"name", "Bob")).andWhere(Predicates.operation(SearchOperation.EQUALS,"name", "John"));
         assertEquals("SELECT * FROM Employee e WHERE name = ? AND name = ?", sb.toString());
         assertEquals(Arrays.asList("Bob", "John"), sb.getParameters());
 
-        sb = new SelectBuilder("Employee e").orWhere(Predicates.eq("name", "John"));
+        sb = new SelectBuilder("Employee e").orWhere(Predicates.operation(SearchOperation.EQUALS,"name", "John"));
         assertEquals("SELECT * FROM Employee e WHERE name = ?", sb.toString());
         assertEquals(Arrays.asList("John"), sb.getParameters());
 
-        sb = new SelectBuilder("Products").where(Predicates.between("Price", 10, 20));
+        sb = new SelectBuilder("Products").where(Predicates.operation(SearchOperation.BETWEEN,"Price", 10, 20));
         assertEquals("SELECT * FROM Products WHERE Price BETWEEN ? AND ?", sb.toString());
         assertEquals(Arrays.asList(10,20), sb.getParameters());
 
         sb = new SelectBuilder("suppliers");
         Predicate condition1 = Predicates.and(
-                Predicates.eq("state", "California"), Predicates.neq("supplier_id", 900));
-        Predicate condition2 = Predicates.eq("supplier_id", 100);
+                Predicates.operation(SearchOperation.EQUALS,"state", "California"), Predicates.operation(SearchOperation.NOT_EQUALS, "supplier_id", 900));
+        Predicate condition2 = Predicates.operation(SearchOperation.EQUALS,"supplier_id", 100);
         sb.where(condition1).orWhere(condition2);
         assertEquals("SELECT * FROM suppliers WHERE (state = ? AND supplier_id <> ?)" +
                 " OR supplier_id = ?", sb.toString());
@@ -93,12 +115,12 @@ public class AppTest
 
     @Test(expected = NullPointerException.class)
     public void testBetweenStartIsNullException() {
-        new SelectBuilder("Products").where(Predicates.between("Price", null, 20));
+        new SelectBuilder("Products").where(Predicates.operation(SearchOperation.BETWEEN, "Price", null, 20));
     }
 
     @Test(expected = NullPointerException.class)
     public void testBetweenEndIsNullException() {
-        new SelectBuilder("Products").where(Predicates.between("Price", 10, null));
+        new SelectBuilder("Products").where(Predicates.operation(SearchOperation.BETWEEN,"Price", 10, null));
     }
 
     @Test
@@ -111,7 +133,7 @@ public class AppTest
         assertEquals("SELECT * FROM Employee e JOIN Department d on e.dept_id = d.id", sb.toString());
 
         sb = new SelectBuilder("Employee e").join("Department d on e.dept_id = d.id")
-                .where(Predicates.like("name", "Bob%"));
+                .where(Predicates.operation(SearchOperation.LIKE,"name", "Bob%"));
         assertEquals("SELECT * FROM Employee e JOIN Department d on e.dept_id = d.id WHERE name like ?",
                 sb.toString());
         assertEquals(Arrays.asList("Bob%"), sb.getParameters());
@@ -149,7 +171,7 @@ public class AppTest
         sb = new SelectBuilder("Employee e").orderBy("name desc").orderBy("age");
         assertEquals("SELECT * FROM Employee e ORDER BY name desc, age", sb.toString());
 
-        sb = new SelectBuilder("Employee").where(Predicates.like("name", "Bob%")).orderBy("age");
+        sb = new SelectBuilder("Employee").where(Predicates.operation(SearchOperation.LIKE, "name", "Bob%")).orderBy("age");
         assertEquals("SELECT * FROM Employee WHERE name like ? ORDER BY age", sb.toString());
         assertEquals(Arrays.asList("Bob%"), sb.getParameters());
 
@@ -201,10 +223,10 @@ public class AppTest
         SelectBuilder sb = new SelectBuilder()
                 .column("COUNT(CustomerID)").column("Country", true)
                 .from("Customers")
-                .having(Predicates.gt("COUNT(CustomerID)", 5));
+                .having(Predicates.operation(SearchOperation.GREATER_THAN_EQUALS,"COUNT(CustomerID)", 5));
 
         assertEquals("SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country" +
-                " HAVING COUNT(CustomerID) > ?", sb.toString());
+                " HAVING COUNT(CustomerID) >= ?", sb.toString());
         assertEquals(Arrays.asList(5), sb.getParameters());
     }
 
@@ -215,7 +237,7 @@ public class AppTest
                 .column("a")
                 .column("b")
                 .from("Foo")
-                .where(Predicates.gt("a", 10))
+                .where(Predicates.operation(SearchOperation.GREATER_THAN,"a", 10))
                 .orderBy("1");
 
         sb.union(new SelectBuilder()

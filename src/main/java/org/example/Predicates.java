@@ -31,7 +31,7 @@ public class Predicates {
      * @param value
      *            Value to which the SQL expression is compared.
      */
-    public static Predicate eq(final String expr, final Object value) {
+    private static Predicate eq(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -42,7 +42,7 @@ public class Predicates {
         };
     }
 
-    public static Predicate between(final String expr, final Object start, final Object end) {
+    private static Predicate between(final String expr, final Object start, final Object end) {
         return new Predicate() {
             @Override
             public void init(SelectBuilder creator) {
@@ -68,7 +68,7 @@ public class Predicates {
      * @param values
      *            Values for the IN clause.
      */
-    public static Predicate in(final String expr, final List<?> values) {
+    private static Predicate in(final String expr, final List<?> values) {
 
         return new Predicate() {
 
@@ -109,7 +109,7 @@ public class Predicates {
      * @param values
      *            Values for the IN clause.
      */
-    public static Predicate in(final String expr, final Object... values) {
+    private static Predicate in(final String expr, final Object... values) {
         return in(expr, Arrays.asList(values));
     }
 
@@ -149,7 +149,7 @@ public class Predicates {
      * @param value
      *            Value to which the SQL expression is compared.
      */
-    public static Predicate neq(final String expr, final Object value) {
+    private static Predicate neq(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -168,7 +168,7 @@ public class Predicates {
      * @param childPredicate
      *            Predicate whose sense is to be inverted.
      */
-    public static Predicate not(final Predicate childPredicate) {
+    private static Predicate not(final Predicate childPredicate) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 childPredicate.init(creator);
@@ -195,15 +195,11 @@ public class Predicates {
 
 
 
-    public static Predicate isNull(final String expr) {
-
-
+    private static Predicate isNull(final String expr) {
         return new Predicate() {
-
             public void init(SelectBuilder creator) {
                 //no value need to be added to parameters
             }
-
             public String toSql() {
                 return String.format("%s is null", expr);
             }
@@ -211,22 +207,18 @@ public class Predicates {
     }
 
 
-    public static Predicate isNotNull(final String expr) {
-
-
+    private static Predicate isNotNull(final String expr) {
         return new Predicate() {
-
             public void init(SelectBuilder creator) {
                 //no value need to be added to parameters
             }
-
             public String toSql() {
                 return String.format("%s is not null", expr);
             }
         };
     }
 
-    public static Predicate gt(final String expr, final Object value) {
+    private static Predicate gt(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -237,7 +229,7 @@ public class Predicates {
         };
     }
 
-    public static Predicate gte(final String expr, final Object value) {
+    private static Predicate gte(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -248,7 +240,7 @@ public class Predicates {
         };
     }
 
-    public static Predicate lt(final String expr, final Object value) {
+    private static Predicate lt(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -259,7 +251,7 @@ public class Predicates {
         };
     }
 
-    public static Predicate lte(final String expr, final Object value) {
+    private static Predicate lte(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -270,7 +262,7 @@ public class Predicates {
         };
     }
 
-    public static Predicate like(final String expr, final Object value) {
+    private static Predicate like(final String expr, final Object value) {
         return new Predicate() {
             public void init(SelectBuilder creator) {
                 creator.parameters(value);
@@ -279,6 +271,57 @@ public class Predicates {
                 return String.format("%s like ?",expr);
             }
         };
+    }
+
+    public static Predicate operation(SearchOperation searchOperation, final String expr, final Object value) {
+        return operation(searchOperation, expr, value, null);
+    }
+
+    public static Predicate operation(SearchOperation searchOperation, final String expr, final Object... value) {
+        return operation(searchOperation, expr, Arrays.asList(value), null);
+    }
+
+    public static Predicate operation(SearchOperation searchOperation, final String expr, final List<?> value) {
+        return operation(searchOperation, expr, value, null);
+    }
+
+
+    public static Predicate operation(SearchOperation searchOperation, final String expr, final Object value, final Object otherValue) {
+        switch (searchOperation) {
+            case EQUALS:
+                return eq(expr, value);
+            case NOT_EQUALS:
+                return neq(expr, value);
+            case GREATER_THAN:
+                return gt(expr, value);
+            case GREATER_THAN_EQUALS:
+                return gte(expr, value);
+            case LESS_THAN:
+                return lt(expr, value);
+            case LESS_THAN_EQUALS:
+                return lte(expr, value);
+            case LIKE:
+                return like(expr, value);
+            case IN: {
+                if(value instanceof List) {
+                    return in(expr,(List) value);
+                } else {
+                    if(otherValue != null) {
+                        return in(expr, value, otherValue);
+                    } else {
+                        return in(expr, value);
+                    }
+                }
+            }
+            case BETWEEN:
+                return between(expr, value, otherValue);
+            case NULL:
+                return isNull(expr);
+            case NOT_NULL:
+                return isNotNull(expr);
+            default:
+                 throw new IllegalArgumentException("Search Operation not supported!");
+        }
     }
 
 

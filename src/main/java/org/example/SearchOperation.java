@@ -1,0 +1,6 @@
+package org.example;
+
+public enum SearchOperation {
+    EQUALS, NOT_EQUALS, GREATER_THAN, GREATER_THAN_EQUALS, LESS_THAN,
+    LESS_THAN_EQUALS, LIKE, IN, BETWEEN, NULL, NOT_NULL;
+}
