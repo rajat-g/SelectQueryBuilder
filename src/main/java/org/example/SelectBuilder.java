@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class SelectBuilder implements Cloneable {
+public class SelectBuilder {
 
     private boolean distinct;
 
@@ -39,11 +39,6 @@ public class SelectBuilder implements Cloneable {
     public SelectBuilder(String table) {
         tables.add(table);
         parameters = new LinkedList<>();
-    }
-
-    @Override
-    public SelectBuilder clone() {
-        return new SelectBuilder(this);
     }
 
     /**
