@@ -14,18 +14,11 @@ public class SubSelectBuilder extends SelectBuilder {
     }
 
     @Override
-    public SubSelectBuilder clone() {
-        return new SubSelectBuilder(this);
-    }
-
-    @Override
     public String toString() {
-        return new StringBuilder()
-                .append("(")
-                .append(super.toString())
-                .append(") as ")
-                .append(alias)
-                .toString();
+        return "(" +
+                super.toString() +
+                ") as " +
+                alias;
     }
 }
 

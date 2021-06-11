@@ -7,27 +7,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class SelectBuilder implements Cloneable, Serializable {
-
-    private static final long serialVersionUID = 1;
+public class SelectBuilder implements Cloneable {
 
     private boolean distinct;
 
-    private List<Object> columns = new ArrayList<>();
+    private final List<Object> columns = new ArrayList<>();
 
-    private List<String> tables = new ArrayList<>();
+    private final List<String> tables = new ArrayList<>();
 
-    private List<ExpressionAndSeparator> joins = new ArrayList<>();
+    private final List<ExpressionAndSeparator> joins = new ArrayList<>();
 
-    private List<ExpressionAndSeparator> wheres = new ArrayList<>();
+    private final List<ExpressionAndSeparator> wheres = new ArrayList<>();
 
-    private List<String> groupBys = new ArrayList<>();
+    private final List<String> groupBys = new ArrayList<>();
 
-    private List<ExpressionAndSeparator> havings = new ArrayList<>();
+    private final List<ExpressionAndSeparator> havings = new ArrayList<>();
 
-    private List<SelectBuilder> unions = new ArrayList<>();
+    private final List<SelectBuilder> unions = new ArrayList<>();
 
-    private List<String> orderBys = new ArrayList<>();
+    private final List<String> orderBys = new ArrayList<>();
 
     private int limit = 0;
 
@@ -56,7 +54,7 @@ public class SelectBuilder implements Cloneable, Serializable {
 
         for (Object column : other.columns) {
             if (column instanceof SubSelectBuilder) {
-                this.columns.add(((SubSelectBuilder) column).clone());
+                this.columns.add(new SubSelectBuilder((SubSelectBuilder) column));
             } else {
                 this.columns.add(column);
             }
@@ -68,12 +66,10 @@ public class SelectBuilder implements Cloneable, Serializable {
         this.groupBys.addAll(other.groupBys);
         this.havings.addAll(other.havings);
 
-        for (SelectBuilder sb : other.unions) {
-            this.unions.add(sb.clone());
-        }
+        this.unions.addAll(other.unions);
 
         this.orderBys.addAll(other.orderBys);
-        this.parameters = new LinkedList<Object>(other.parameters);
+        this.parameters = new LinkedList<>(other.parameters);
     }
 
     public SelectBuilder column(String... names) {
@@ -102,11 +98,6 @@ public class SelectBuilder implements Cloneable, Serializable {
 
     public SelectBuilder limit(int limit) {
         return limit(limit, 0);
-    }
-
-    @Override
-    public SelectBuilder clone() {
-        return new SelectBuilder(this);
     }
 
     public SelectBuilder distinct() {
@@ -213,14 +204,14 @@ public class SelectBuilder implements Cloneable, Serializable {
             sql.append("distinct ");
         }
 
-        if (columns.size() == 0) {
+        if (columns.isEmpty()) {
             sql.append("*");
         } else {
             appendList(sql, columns, "", ", ");
         }
 
         appendList(sql, tables, " FROM ", ", ");
-        appendList(sql, joins, joins.size() > 0 ? joins.get(0).getSeparator() : " ");
+        appendList(sql, joins, !joins.isEmpty() ? joins.get(0).getSeparator() : " ");
         appendList(sql, wheres, " WHERE ");
         appendList(sql, groupBys, " GROUP BY ", ", ");
         appendList(sql, havings, " HAVING ");
