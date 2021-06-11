@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -99,20 +100,6 @@ public class Predicates {
             }
         };
     }
-
-
-    /**
-     * Adds an IN clause to a creator.
-     *
-     * @param expr
-     *            SQL expression to be tested for inclusion.
-     * @param values
-     *            Values for the IN clause.
-     */
-    public static Predicate in(final String expr, final Object... values) {
-        return in(expr, Arrays.asList(values));
-    }
-
 
     /**
      * Factory for 'and' and 'or' predicates.
