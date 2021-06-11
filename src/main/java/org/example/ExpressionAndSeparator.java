@@ -5,7 +5,7 @@ public abstract class ExpressionAndSeparator {
     private String expression;
     private String separator;
 
-    public ExpressionAndSeparator(String expression, String separator) {
+    protected ExpressionAndSeparator(String expression, String separator) {
         this.expression = expression;
         this.separator = separator;
     }

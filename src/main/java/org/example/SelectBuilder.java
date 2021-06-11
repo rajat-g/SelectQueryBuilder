@@ -1,6 +1,5 @@
 package org.example;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -40,6 +39,11 @@ public class SelectBuilder implements Cloneable {
     public SelectBuilder(String table) {
         tables.add(table);
         parameters = new LinkedList<>();
+    }
+
+    @Override
+    public SelectBuilder clone() {
+        return new SelectBuilder(this);
     }
 
     /**
